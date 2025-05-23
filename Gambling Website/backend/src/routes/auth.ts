@@ -12,7 +12,7 @@ const authRouter = express.Router();
 authRouter.post("/tokenIsValid", tokenIsValid);   // Token validation
 authRouter.post("/signup", signup); //Signup route
 authRouter.post("/signin",signin); //Signin route
-authRouter.post("/dashboard",getDashboard);
+authRouter.get("/dashboard",auth,getDashboard);
 
 
 // authRouter.get("/protected", auth, (req, res) => {

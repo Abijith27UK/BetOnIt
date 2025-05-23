@@ -21,7 +21,7 @@ export const AuthPage = () => {
 
       const { data } = await axios.post(`${BACKEND_URL}${endpoint}`, payload);
       localStorage.setItem("auth-token", data.token);
-      alert(data.message || "Success");
+      // alert(data.message || "Success");
       navigate("/");
     } catch (err: any) {
       alert(err.response?.data?.message || "Something went wrong");

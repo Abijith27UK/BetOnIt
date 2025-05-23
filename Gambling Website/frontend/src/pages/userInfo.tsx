@@ -1,32 +1,54 @@
-import React from "react";
+import React , {useState , useEffect} from "react";
+import { useNavigate } from "react-router-dom";
 import { FaRupeeSign } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
+import { useAuth } from "../hooks/useAuth";
+import axios from "axios";
 
 interface Bet {
   gameId: number;
   gameName: string;
-  stake: number;
+  amount: number;
   status: "Won" | "Lost" | "Pending";
 }
 
+interface UserData {
+  username: string;
+  email: string;
+  balance: number;
+  currentBets: Bet[];
+  betHistory: Bet[];
+}   
+
 const Dashboard: React.FC = () => {
-  // Hardcoded values for frontend testing
-  const username = "JohnDoe";
-  const email = "johndoe@example.com";
-  const balance = 12500.75;
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("auth-token"); // Or wherever you store it
+        const res = await axios.get("http://localhost:3000/dashboard", {
+          headers: {
+            "x-auth-token": token || "",
+          },
+        });
+        setUserData(res.data);
+      } catch (err) {
+        console.error("Failed to fetch dashboard data", err);
+      }
+    };
 
-  const currentBets: Bet[] = [
-    { gameId: 1, gameName: "India vs Australia", stake: 500, status: "Pending" },
-    { gameId: 2, gameName: "MI vs CSK", stake: 800, status: "Pending" },
-  ];
-
-  const betHistory: Bet[] = [
-    { gameId: 3, gameName: "Liverpool vs Real Madrid", stake: 1000, status: "Won" },
-    { gameId: 4, gameName: "RR vs RCB", stake: 700, status: "Lost" },
-  ];
-
+    fetchData();
+  }, []);
+  if (!userData) return <div>Loading...</div>;
+  const { isSignedIn, logout } = useAuth();
   const onLogout = () => {
-    alert("Logged out!");
+    if (isSignedIn) {
+      logout(); // Clear token
+      navigate("/signin");
+    } else {
+      navigate("/signin");
+    }
   };
 
   return (
@@ -48,16 +70,16 @@ const Dashboard: React.FC = () => {
         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4 bg-gray-800 rounded-2xl p-6 shadow-md">
           <div>
             <p className="text-gray-400">Username</p>
-            <p className="font-bold text-lg">{username}</p>
+            <p className="font-bold text-lg">{userData.username}</p>
           </div>
           <div>
             <p className="text-gray-400">Email</p>
-            <p className="font-bold text-lg">{email}</p>
+            <p className="font-bold text-lg">{userData.email}</p>
           </div>
           <div>
             <p className="text-gray-400">Account Balance</p>
             <p className="text-green-400 text-xl font-extrabold flex items-center">
-              <FaRupeeSign className="mr-1" /> {balance.toFixed(2)}
+              <FaRupeeSign className="mr-1" /> {userData.balance.toFixed(2)}
             </p>
           </div>
         </div>
@@ -78,10 +100,21 @@ const Dashboard: React.FC = () => {
             📈 Current Bets
           </h2>
           <div className="space-y-3">
-            {currentBets.length === 0 ? (
-              <p className="text-gray-400">No active bets.</p>
+            {userData.currentBets.length === 0 ? (              
+              <div className="bg-gray-800 rounded-lg p-4 flex justify-between items-center shadow-md">
+                  <div>
+                    <p className="text-white font-semibold">No bids</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Stake</p>
+                    <p className="text-lg font-bold text-yellow-400">₹000</p>
+                  </div>
+                  <div className="text-sm font-semibold px-4 py-1 rounded-full bg-gray-700 text-white">
+                    Null
+                  </div>
+                </div>
             ) : (
-              currentBets.map((bet) => (
+              userData.currentBets.map((bet) => (
                 <div
                   key={bet.gameId}
                   className="bg-gray-800 rounded-lg p-4 flex justify-between items-center shadow-md"
@@ -91,7 +124,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Stake</p>
-                    <p className="text-lg font-bold text-yellow-400">₹{bet.stake}</p>
+                    <p className="text-lg font-bold text-yellow-400">₹{bet.amount}</p>
                   </div>
                   <div className="text-sm font-semibold px-4 py-1 rounded-full bg-gray-700 text-white">
                     {bet.status}
@@ -108,10 +141,10 @@ const Dashboard: React.FC = () => {
             🕘 Bet History
         </h2>
           <div className="space-y-3">
-            {betHistory.length === 0 ? (
+            {userData.betHistory.length === 0 ? (
               <p className="text-gray-400">No previous bets.</p>
             ) : (
-              betHistory.map((bet) => (
+              userData.betHistory.map((bet) => (
                 <div
                   key={bet.gameId}
                   className="bg-gray-800 rounded-lg p-4 flex justify-between items-center"
@@ -121,7 +154,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Stake</p>
-                    <p className="text-lg font-bold text-yellow-400">₹{bet.stake}</p>
+                    <p className="text-lg font-bold text-yellow-400">₹{bet.amount}</p>
                   </div>
                   <div
                     className={`text-sm font-semibold px-4 py-1 rounded-full ${

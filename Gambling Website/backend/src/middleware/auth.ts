@@ -1,36 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-interface JwtPayload {
-  id: string;
-  role: string;
-  // add more fields if needed
-}
-
-interface AuthenticatedRequest extends Request {
+interface AuthRequest extends Request {
   user?: {
     id: string;
-    role: string;
+    role?: string;
   };
-  token?: string;
 }
-
-const auth = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const JWT_SECRET = "Secret";
+const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.header("x-auth-token");
-    if (!token) {
-      return res.status(401).json({ msg: "No auth token, access denied" });
-    }
+    if (!token) return res.status(401).json({ msg: "No auth token, access denied" });
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+    const verified = jwt.verify(token, JWT_SECRET as string);
+    if (!verified || typeof verified !== "object") return res.status(401).json({ msg: "Token verification failed" });
 
-    if (!verified) {
-      return res.status(401).json({ msg: "Token verification failed, authorization denied." });
-    }
-
-    req.user = { id: verified.id, role: verified.role };
-    req.token = token;
-
+    req.user = { id: (verified as any).id, role: (verified as any).role };
     next();
   } catch (err: any) {
     res.status(500).json({ error: err.message });
