@@ -20,7 +20,7 @@ export const signup = async (req: Request, res: Response):Promise<void> => {
     const newUser = new User({ username, email, password : hashedPassword });
     await newUser.save();
     const token = jwt.sign(
-      { id: email },
+      { id: newUser._id },
       JWT_SECRET as string, 
       { expiresIn: "7d" }
     );

@@ -29,4 +29,3 @@ export const signin = async (req: Request, res: Response) => {
   }
 };
 
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjM0LCJpYXQiOjE3NDIwMTI0MTQsImV4cCI6MTc0MjAxNjAxNH0.Gp6wIci5crS6dMyb5LhtmKY0X_-psa2O237tT86me5o

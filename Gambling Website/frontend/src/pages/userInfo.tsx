@@ -37,7 +37,6 @@ const Dashboard: React.FC = () => {
         console.error("Failed to fetch dashboard data", err);
       }
     };
-
     fetchData();
   }, []);
   if (!userData) return <div>Loading...</div>;

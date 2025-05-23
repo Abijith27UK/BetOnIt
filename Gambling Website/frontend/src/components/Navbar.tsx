@@ -117,7 +117,7 @@ export const Navbar = () => {
                   className="block w-full px-4 py-2 text-center dark:bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => {
                     setIsDropdownOpen(false);
-                    navigate("/dashboard");
+                    navigate("/sports");
                   }}
                 >
                   Sports
