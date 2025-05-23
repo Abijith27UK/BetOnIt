@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/outcomes.ts","./src/middleware/auth.ts","./src/middleware/getdata.ts","./src/middleware/tokenisvalid.ts","./src/models/user.ts","./src/routes/auth.ts"],"version":"5.8.3"}

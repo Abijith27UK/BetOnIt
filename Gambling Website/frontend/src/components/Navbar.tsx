@@ -2,15 +2,14 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { Button } from "./ui";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-
-// Simulate auth status (replace with real auth state logic)
-const isSignedIn = false; // Replace with real authentication check
+import { useAuth } from "../hooks/useAuth";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isSignedIn, logout } = useAuth();
 
   // Close dropdown when clicked outside
   useEffect(() => {
@@ -25,8 +24,8 @@ export const Navbar = () => {
 
   const handleAuthAction = () => {
     if (isSignedIn) {
-      // logout logic
-      console.log("Logging out...");
+      logout(); // Clear token
+      navigate("/signin");
     } else {
       navigate("/signin");
     }

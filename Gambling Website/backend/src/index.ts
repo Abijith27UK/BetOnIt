@@ -1,12 +1,19 @@
-
+import mongoose = require("mongoose");
 import express from "express";
 import { outcomes } from "./outcomes";
 import cors from "cors";
+import authRouter from "./routes/auth";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
+const PORT = parseInt(process.env.PORT || "3000", 10);
 app.use(cors())
-
+app.use(express.json());
+app.use(authRouter);
 const TOTAL_DROPS = 16;
+
+const DB = "mongodb+srv://fiitjeeb02:4EnTAfOlGfwUTwe4@betonit.ehovkwp.mongodb.net/"; 
 
 const MULTIPLIERS: {[ key: number ]: number} = {
     0: 16,
@@ -50,4 +57,11 @@ app.post("/game", (req, res) => {
     });
 });
 
-app.listen(3000)
+mongoose
+  .connect(DB)
+  .then(() => console.log("✅ Connected to DB"))
+  .catch((e: any) => console.error("DB Connection Error:", e));
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`connected at port ${PORT}`);
+});

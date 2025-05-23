@@ -1,8 +1,32 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+const BACKEND_URL = "http://localhost:3000";
 
 export const AuthPage = () => {
+  const navigate = useNavigate();
   const [isSignIn, setIsSignIn] = useState(true);
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const endpoint = isSignIn ? "/signin" : "/signup";
+      const payload = isSignIn
+        ? { username, password }
+        : { email, username, password };
+
+      const { data } = await axios.post(`${BACKEND_URL}${endpoint}`, payload);
+      localStorage.setItem("auth-token", data.token);
+      alert(data.message || "Success");
+      navigate("/");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Something went wrong");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-r from-black via-gray-900 to-black">
@@ -47,22 +71,28 @@ export const AuthPage = () => {
         </div>
 
         {/* Auth Form */}
-        <form className="w-full max-w-sm space-y-6">
+        <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
             {/* Conditionally rendered email input */}
             {!isSignIn && (
             <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
                 className="w-full px-4 py-3 rounded-lg bg-gray-800 placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
             )}
             <input
             type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
             className="w-full px-4 py-3 rounded-lg bg-gray-800 placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
             <input
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="w-full px-4 py-3 rounded-lg bg-gray-800 placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
