@@ -1,8 +1,11 @@
 import mongoose = require("mongoose");
 import express from "express";
+import { Request, Response } from "express";
 import { outcomes } from "./outcomes";
+import User from "./models/user";
 import cors from "cors";
 import authRouter from "./routes/auth";
+import auth from "./middleware/auth";
 import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
@@ -38,7 +41,22 @@ const MULTIPLIERS: {[ key: number ]: number} = {
     16: 16
 }
 
-app.post("/game", (req, res) => {
+interface AuthenticatedRequest extends Request {
+  user?: string; 
+}
+
+app.post("/game",auth , async (req: AuthenticatedRequest, res: Response) => {
+  try{  
+    console.log("Inside game route");
+    const userId = (req as any).user.id;
+    console.log("req.user >>>", (req as any).user);
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.balance < 10) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+    user.balance -= 10;
     let outcome = 0;
     const pattern = []
     for (let i = 0; i < TOTAL_DROPS; i++) {
@@ -52,12 +70,28 @@ app.post("/game", (req, res) => {
 
     const multiplier = MULTIPLIERS[outcome];
     const possiblieOutcomes = outcomes[outcome];
+    const reward = Math.round(10 * multiplier);
+    user.balance += reward;
+    console.log(multiplier,pattern,reward);
 
+    // Update bet history
+    user.betHistory.push({
+      gameId: "PLINKO",
+      gameName: "Plinko",
+      amount: 10,
+      status: reward >= 10 ? "Won" :"Lost",
+      placedAt: new Date(),
+    });
+    await user.save();
     res.send({
         point: possiblieOutcomes[Math.floor(Math.random() * possiblieOutcomes.length || 0)],
         multiplier,
         pattern
     });
+  }catch(err){
+    console.error("Game error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 // Create raw HTTP server
