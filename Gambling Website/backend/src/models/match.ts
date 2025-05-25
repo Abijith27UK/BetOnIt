@@ -18,16 +18,18 @@ interface BetsSummaryEntry {
 }
 
 interface BetsSummary {
-  TeamA: {
-    0: BetsSummaryEntry;
-    1: BetsSummaryEntry;
-    2: BetsSummaryEntry;
-  };
-  TeamB: {
-    0: BetsSummaryEntry;
-    1: BetsSummaryEntry;
-    2: BetsSummaryEntry;
-  };
+//   TeamA: {
+//     0: BetsSummaryEntry;
+//     1: BetsSummaryEntry;
+//     2: BetsSummaryEntry;
+//   };
+//   TeamB: {
+//     0: BetsSummaryEntry;
+//     1: BetsSummaryEntry;
+//     2: BetsSummaryEntry;
+//   };
+  TeamA: { [key: number]: BetsSummaryEntry };
+  TeamB: { [key: number]: BetsSummaryEntry };
 }
 
 export interface IMatch extends Document {

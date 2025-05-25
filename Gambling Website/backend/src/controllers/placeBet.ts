@@ -4,9 +4,9 @@ import User from '../models/user';
 
 export const placeBet = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log("Inside placeBets API");
     const { userId, matchId, team, amount, timeFrame, gameName } = req.body;
 
-    // Validate team as 'TeamA' | 'TeamB'
     if (!["TeamA", "TeamB"].includes(team)) {
       res.status(400).json({ error: "Invalid team" });
       return;
@@ -32,15 +32,15 @@ export const placeBet = async (req: Request, res: Response): Promise<void> => {
     const totalTeamAmount = match.bets
       .filter(b => b.team === teamTyped)
       .reduce((sum, b) => sum + b.amount, 0);
-
+    console.log("totalTeamAmount=",totalTeamAmount)
     const totalOpposingAmount = match.bets
       .filter(b => b.team === opposingTeam)
       .reduce((sum, b) => sum + b.amount, 0);
-
+    console.log("totalOpposingAmount=",totalOpposingAmount)
     const newTotalTeamAmount = totalTeamAmount + amount;
-
+    console.log("newTotalTeamAmount=",newTotalTeamAmount)
     const oddsAtPlacement =
-      totalOpposingAmount === 0 ? 50 : 50 * (newTotalTeamAmount / totalOpposingAmount);
+      tf === 0 ? 50 : 100 * (totalOpposingAmount / (totalOpposingAmount + newTotalTeamAmount));
 
     if (user.balance < amount) {
       res.status(400).json({ error: 'Insufficient balance' });
@@ -64,7 +64,10 @@ export const placeBet = async (req: Request, res: Response): Promise<void> => {
     }
 
     match.betsSummary[teamTyped][tf].totalAmount += amount;
-    match.betsSummary[teamTyped][tf].totalOdds += (100 - oddsAtPlacement);
+    match.betsSummary[teamTyped][tf].totalOdds += (oddsAtPlacement);
+
+    console.log("match.betsSummary[teamTyped][tf].totalAmount=",match.betsSummary[teamTyped][tf].totalAmount);
+    console.log("match.betsSummary[teamTyped][tf].totalOdds += (oddsAtPlacement)=",match.betsSummary[teamTyped][tf].totalOdds += (oddsAtPlacement))
 
     // Add to user's bet history
     user.betHistory.push({

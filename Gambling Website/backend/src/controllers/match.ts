@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import Match from "../models/match";
 import User from "../models/user";
+import axios from "axios";
 
 interface AuthenticatedRequest extends Request {
   user?: string; 
 }
+
+const timeframeDurations = [5 * 60 * 1000, 3 * 60 * 1000, 2 * 60 * 1000];
 
 export const createMatch = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -23,11 +26,11 @@ export const createMatch = async (req: AuthenticatedRequest, res: Response) => {
     }
     const newMatch = new Match({ gameName, teamA, teamB, startTime });
     await newMatch.save();
-
+    console.log("Match created successfully.", newMatch);
     res.status(201).json({ message: "Match created successfully.", match: newMatch });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error.",err });
+    res.status(500).json({ message: "Server error.", err });
   }
 };
 
@@ -57,3 +60,5 @@ export const getUser = async (req: AuthenticatedRequest, res: Response) => {
         res.status(500).json({ message: "Server error.",err });
     }  
 };
+
+

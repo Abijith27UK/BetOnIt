@@ -80,8 +80,8 @@ userSchema.pre<IUser>("save", async function (next) {
 //     const salt = await bcrypt.genSalt();
 //     this.password = await bcrypt.hash(this.password, salt);
 //   }
-  if (this.betHistory && this.betHistory.length > 2) {
-    this.betHistory = this.betHistory.slice(-2);
+  if (this.betHistory && this.betHistory.length > 4) {
+    this.betHistory = this.betHistory.slice(-4);
   }
   next();
 });

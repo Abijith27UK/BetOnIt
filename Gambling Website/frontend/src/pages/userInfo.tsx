@@ -94,7 +94,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Current Active Bets */}
-        <div>
+        {/* <div>
           <h2 className="text-2xl font-bold mb-4 text-green-400" style={{ fontFamily: "'Press Start 2P', cursive" }}>
             📈 Current Bets
           </h2>
@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
               ))
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Bet History */}
         <div>

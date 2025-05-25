@@ -10,10 +10,10 @@ interface Match {
   teamB: string;
   startTime: string;
   timeframe: number;
-  oddsA: number;
-  oddsB: number;
-  bidsA: number;
-  bidsB: number;
+  betSummary: {
+    totalAmountA: number;
+    totalAmountB: number;
+  };
 }
 
 const timeframeDurations = [0, 300000, 300000]; // 5 min for 1st and 2nd halves
@@ -54,12 +54,8 @@ const SportsBettingPage = () => {
     fetchUser();
 
     const socket = io("http://localhost:3000");
-    socket.on("oddsUpdate", ({ matchId, oddsA, oddsB }) => {
-      setMatches((prev) =>
-        prev.map((m) =>
-          m._id === matchId ? { ...m, oddsA, oddsB } : m
-        )
-      );
+    socket.on("oddsUpdate", ({ matchId }) => {
+      fetchMatches();
     });
 
     return () => { socket.disconnect(); };
@@ -135,13 +131,13 @@ const SportsBettingPage = () => {
             }
         );
         }
-        await axios.post(
-        "http://localhost:3000/api/finalize",
-        { matchId },
-        {
-            headers: { "x-auth-token": token || "" },
-        }
-        );
+        // await axios.post(
+        // "http://localhost:3000/api/finalize",
+        // { matchId },
+        // {
+        //     headers: { "x-auth-token": token || "" },
+        // }
+        // );
         setBids((prev) => {
         const newBids = { ...prev };
         delete newBids[matchId];
@@ -161,20 +157,30 @@ const SportsBettingPage = () => {
     return 3;
   };
 
+  const calculateOdds = (match: Match, timeframe: number) => {
+    if (timeframe === 0) return { oddsA: 50, oddsB: 50 }; // Pre-match
+    const { totalAmountA, totalAmountB } = match.betSummary || { totalAmountA: 0, totalAmountB: 0 };
+    const total = totalAmountA + totalAmountB;
+    if (total === 0) return { oddsA: 50, oddsB: 50 }; // Avoid NaN
+    const oddsA = Math.round((100 * totalAmountA) / total);
+    const oddsB = 100 - oddsA;
+    return { oddsA, oddsB };
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-black via-gray-900 to-black p-6 text-white font-['Roboto_Mono']">
       <h1 className="text-4xl font-bold text-center mb-10 font-['Bebas_Neue'] tracking-wider">
         ⚽Live Sports Betting🏏
       </h1>
       <div className="text-right mb-6 text-lg font-['Space_Grotesk']">
-        Balance: ₹{userBalance}
+        Balance: ₹{userBalance.toFixed(2)}
       </div>
       <div className="flex flex-col gap-8">
         {matches.map((match) => {
           const timeframe = getTimeframe(match.startTime);
           const { label, color } = getTimeframeLabel(timeframe);
           const bid = bids[match._id] || { teamA: 0, teamB: 0 };
-
+          const { oddsA, oddsB } = calculateOdds(match, timeframe);
           return (
             <div
             key={match._id}
@@ -227,10 +233,10 @@ const SportsBettingPage = () => {
               <div className="w-full lg:w-64 mt-6 lg:mt-0 flex flex-col justify-center items-center bg-black border border-gray-600 rounded-xl p-4 font-['Bebas_Neue']">
                 <h4 className="text-xl text-gray-400 mb-2">Live Odds</h4>
                 <div className="text-center text-white text-4xl mb-3">
-                  {match.teamA}: <span className="text-red-400">{match.oddsA}</span>
+                  {match.teamA}: <span className="text-red-400">{oddsA}</span>
                 </div>
                 <div className="text-center text-white text-4xl">
-                  {match.teamB}: <span className="text-blue-400">{match.oddsB}</span>
+                  {match.teamB}: <span className="text-blue-400">{oddsB}</span>
                 </div>
               </div>
             </div>

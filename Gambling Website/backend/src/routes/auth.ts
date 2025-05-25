@@ -6,6 +6,8 @@ import { signin } from "../controllers/signin";
 import { getDashboard } from "../controllers/dashboard";
 import { createMatch , getMatches , getUser } from "../controllers/match";
 import { placeBet } from '../controllers/placeBet';
+import { setMatchResult } from "../controllers/updateResult";
+import { calculateResult } from "../controllers/calculateResult";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -18,8 +20,9 @@ authRouter.get("/dashboard",auth,getDashboard); //fetching data for Dashboard
 authRouter.post("/createMatch",auth,createMatch); //creating new competition
 authRouter.get("/getMatches",getMatches); //get all matches for bids
 authRouter.get("/getUser",auth,getUser); //get user details
-authRouter.post("/api/bet", placeBet); //p/acing bet function API
-
+authRouter.post("/api/bet", placeBet); //placing bet function API
+authRouter.post("/setMatchResult",auth,setMatchResult); //choosing match result
+authRouter.post("/calculateResult",calculateResult);
 
 // authRouter.get("/protected", auth, (req, res) => {
 //   res.json({ message: "You are authenticated", user: req.user });

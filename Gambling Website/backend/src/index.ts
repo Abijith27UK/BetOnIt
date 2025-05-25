@@ -6,6 +6,7 @@ import authRouter from "./routes/auth";
 import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
+import "./scheduler/matchScheduler";
 dotenv.config();
 
 const app = express();
