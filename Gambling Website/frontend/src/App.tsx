@@ -6,6 +6,7 @@ import { AuthPage } from "./pages/Signin";
 import { Footer, Navbar } from "./components";
 import Dashboard from "./pages/userInfo";
 import { Home } from "./pages/Home";
+import SportsBettingPage from "./pages/sports";
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/game" element={<Game />} />
         <Route path="/signin" element={<AuthPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/sports" element={<SportsBettingPage />} />
       </Routes>
       <Footer />
     </BrowserRouter>

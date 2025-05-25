@@ -5,6 +5,9 @@ export default {
     extend: {
       fontFamily: {
         gamble: ['"Black Ops One"', 'cursive'],
+        mono: ['Roboto Mono', 'monospace'],
+        grotesk: ['Space Grotesk', 'sans-serif'],
+        bebas: ['Bebas Neue', 'cursive']
       },
     },
   },

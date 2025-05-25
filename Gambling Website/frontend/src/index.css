@@ -10,7 +10,7 @@
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   /* background-color: #213743; */
-  background-color: #302e2b;
+  background-color: gradient-to-r from-black via-gray-900 to-black;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
