@@ -6,21 +6,26 @@ import User from "./models/user";
 import cors from "cors";
 import authRouter from "./routes/auth";
 import auth from "./middleware/auth";
-import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
 import "./scheduler/matchScheduler";
 import Match from "./models/match";
-dotenv.config();
+import { env } from "./config/env";
 
 const app = express();
-const PORT = parseInt(process.env.PORT || "3000", 10);
+const PORT = env.port;
 app.use(cors())
 app.use(express.json());
 app.use(authRouter);
 const TOTAL_DROPS = 16;
 
-const DB = "mongodb://fiitjeeb02:4EnTAfOlGfwUTwe4@ac-ov52jai-shard-00-00.ehovkwp.mongodb.net:27017,ac-ov52jai-shard-00-01.ehovkwp.mongodb.net:27017,ac-ov52jai-shard-00-02.ehovkwp.mongodb.net:27017/?replicaSet=atlas-136qno-shard-0&ssl=true&authSource=admin";
+// Use environment variable for database URI
+const DB = env.mongodbUri;
+
+if (!DB) {
+  console.error("MONGODB_URI is not defined in environment variables");
+  process.exit(1);
+}
 
 const MULTIPLIERS: {[ key: number ]: number} = {
     0: 16,
