@@ -93,7 +93,7 @@ export function Game() {
       {/* Balance */}
       <div>
         <div className="text-2xl font-bold text-green-400 font-grotesk">
-          ₹{balance !== null ? balance : "Loading..."}
+          ₹{balance !== null ? balance.toFixed(0) : "Loading..."}
         </div>
         <div className="text-sm text-gray-300 font-grotesk">Your Balance</div>
       </div>

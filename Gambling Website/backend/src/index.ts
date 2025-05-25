@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
 import "./scheduler/matchScheduler";
+import Match from "./models/match";
 dotenv.config();
 
 const app = express();
@@ -100,15 +101,81 @@ const httpServer = http.createServer(app);
 // Attach socket.io to this HTTP server
 const io = new Server(httpServer, {
   cors: {
-    origin: "*", // Adjust for production to your frontend origin
+    origin: "http://localhost:5173", // Adjust for production to your frontend origin
     methods: ["GET", "POST"],
   },
 });
 
+// Function to calculate odds for a match
+function calculateMatchOdds(match: any) {
+  const { betsSummary } = match;
+  const timeframe = getCurrentTimeframe(match.startTime);
+  
+  const totalAmountA = Object.values(betsSummary.TeamA || {}).reduce(
+    (sum: number, tf: any) => sum + (tf.totalAmount || 0),
+    0
+  );
+  const totalAmountB = Object.values(betsSummary.TeamB || {}).reduce(
+    (sum: number, tf: any) => sum + (tf.totalAmount || 0),
+    0
+  );
+  const total = totalAmountA + totalAmountB;
+
+  if (total === 0) {
+    return { oddsA: 50, oddsB: 50 };
+  }
+
+  const oddsA = Math.round((totalAmountA * 100) / total);
+  const oddsB = 100 - oddsA;
+
+  // if(timeframe==0) {
+  //     return { oddsA: 50, oddsB: 50 };
+  // }
+
+  return { oddsA, oddsB };
+}
+
+// Function to get current timeframe
+function getCurrentTimeframe(startTime: string) {
+  const now = new Date().getTime();
+  const start = new Date(startTime).getTime();
+  if (now < start) return 0;
+  if (now < start + 300000) return 1; // 5 minutes
+  if (now < start + 600000) return 2; // 10 minutes
+  return 3;
+}
+
+// Emit odds updates every 2 seconds
+setInterval(async () => {
+  try {
+    const matches = await Match.find({});
+    const oddsUpdates = matches.map(match => ({
+      matchId: match._id,
+      odds: calculateMatchOdds(match)
+    }));
+    io.emit('sportsOddsUpdate', oddsUpdates);
+  } catch (error) {
+    console.error('Error calculating odds:', error);
+  }
+}, 2000);
+
 io.on("connection", (socket) => {
   console.log("A client connected:", socket.id);
+  
+  // Send initial odds when client connects
+  socket.on('requestInitialOdds', async () => {
+    try {
+      const matches = await Match.find({});
+      const oddsUpdates = matches.map(match => ({
+        matchId: match._id,
+        odds: calculateMatchOdds(match)
+      }));
+      socket.emit('sportsOddsUpdate', oddsUpdates);
+    } catch (error) {
+      console.error('Error sending initial odds:', error);
+    }
+  });
 
-  // Example event
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
   });
@@ -119,6 +186,6 @@ mongoose
   .then(() => console.log("✅ Connected to DB"))
   .catch((e: any) => console.error("DB Connection Error:", e));
 
-app.listen(PORT, "0.0.0.0", () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`connected at port ${PORT}`);
 });

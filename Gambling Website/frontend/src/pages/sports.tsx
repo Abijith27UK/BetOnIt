@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import io from "socket.io-client";
+import { baseURL } from "../utils";
 // import { useAuth } from "../hooks/useAuth";
 
 interface Match {
@@ -13,6 +14,14 @@ interface Match {
   betSummary: {
     totalAmountA: number;
     totalAmountB: number;
+  };
+}
+
+interface OddsUpdate {
+  matchId: string;
+  odds: {
+    oddsA: number;
+    oddsB: number;
   };
 }
 
@@ -31,34 +40,52 @@ const SportsBettingPage = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [bids, setBids] = useState<Record<string, { teamA: number; teamB: number }>>({});
   const [userBalance, setUserBalance] = useState<number>(0);
+  const [odds, setOdds] = useState<Record<string, { oddsA: number; oddsB: number }>>({});
 
   useEffect(() => {
     const fetchMatches = async () => {
-      const res = await axios.get("http://localhost:3000/getMatches");
+      const res = await axios.get(`${baseURL}/getMatches`);
       setMatches(res.data.matches);
     };
+    
     const fetchUser = async () => {
       try {
-    const token = localStorage.getItem("auth-token");
-    const res = await axios.get("http://localhost:3000/getUser", {
-      headers: {
-        "x-auth-token": token || "",
-      },
-    });
-    setUserBalance(res.data.user.balance);
-    } catch (error) {
+        const token = localStorage.getItem("auth-token");
+        const res = await axios.get(`${baseURL}/getUser`, {
+          headers: {
+            "x-auth-token": token || "",
+          },
+        });
+        setUserBalance(res.data.user.balance);
+      } catch (error) {
         console.error("Error fetching user:", error);
-    }
+      }
     };
+
     fetchMatches();
     fetchUser();
 
-    const socket = io("http://localhost:3000");
-    socket.on("oddsUpdate", ({ matchId }) => {
-      fetchMatches();
+    // Initialize Socket.IO connection
+    const socket = io(baseURL);
+    
+    socket.on("connect", () => {
+      console.log("Connected to socket server:", socket.id);
+      // Request initial odds when connected
+      socket.emit('requestInitialOdds');
     });
 
-    return () => { socket.disconnect(); };
+    // Listen for odds updates
+    socket.on("sportsOddsUpdate", (updates: OddsUpdate[]) => {
+      const newOdds = { ...odds };
+      updates.forEach(update => {
+        newOdds[update.matchId] = update.odds;
+      });
+      setOdds(newOdds);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const updateBid = (matchId: string, team: "teamA" | "teamB", action: "inc" | "dec") => {
@@ -89,7 +116,7 @@ const SportsBettingPage = () => {
     const timeFrame = getTimeframe(match.startTime);
     const token = localStorage.getItem("auth-token");
     try {
-        const res = await axios.get("http://localhost:3000/getUser", {
+        const res = await axios.get(`${baseURL}/getUser`, {
         headers: {
             "x-auth-token": token || "",
         },
@@ -101,7 +128,7 @@ const SportsBettingPage = () => {
         }
         if (bid.teamA > 0) {
         await axios.post(
-            "http://localhost:3000/api/bet",
+            `${baseURL}/api/bet`,
             {
             matchId,
             gameName : match.gameName,
@@ -117,7 +144,7 @@ const SportsBettingPage = () => {
         }
         if (bid.teamB > 0) {
         await axios.post(
-            "http://localhost:3000/api/bet",
+            `${baseURL}/api/bet`,
             {
             matchId,
             gameName : match.gameName,
@@ -180,11 +207,12 @@ const SportsBettingPage = () => {
           const timeframe = getTimeframe(match.startTime);
           const { label, color } = getTimeframeLabel(timeframe);
           const bid = bids[match._id] || { teamA: 0, teamB: 0 };
-          const { oddsA, oddsB } = calculateOdds(match, timeframe);
+          const matchOdds = odds[match._id] || { oddsA: 50, oddsB: 50 };
+          
           return (
             <div
-            key={match._id}
-            className="flex flex-col lg:flex-row bg-gray-800 border border-gray-700 shadow-xl rounded-2xl p-4 gap-4"
+              key={match._id}
+              className="flex flex-col lg:flex-row bg-gray-800 border border-gray-700 shadow-xl rounded-2xl p-4 gap-4"
             >
               {/* Bidding Section */}
               <div className="flex-1 w-full">
@@ -233,10 +261,10 @@ const SportsBettingPage = () => {
               <div className="w-full lg:w-64 mt-6 lg:mt-0 flex flex-col justify-center items-center bg-black border border-gray-600 rounded-xl p-4 font-['Bebas_Neue']">
                 <h4 className="text-xl text-gray-400 mb-2">Live Odds</h4>
                 <div className="text-center text-white text-4xl mb-3">
-                  {match.teamA}: <span className="text-red-400">{oddsA}</span>
+                  {match.teamA}: <span className="text-red-400">{timeframe === 0? 50 : (timeframe === 3) ? "Closed" : matchOdds.oddsA}</span>
                 </div>
                 <div className="text-center text-white text-4xl">
-                  {match.teamB}: <span className="text-blue-400">{oddsB}</span>
+                  {match.teamB}: <span className="text-blue-400">{timeframe === 0? 50 : (timeframe === 3) ? "Closed" : matchOdds.oddsB}</span>
                 </div>
               </div>
             </div>
