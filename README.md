@@ -46,16 +46,17 @@
 - Implemented a **risk factor model** that adjusts reward multipliers based on:
   - Current match phase
   - Selected odds
-  - Historical performance of teams
 - Custom **reward calculation system** adapts based on:
   - Bet timing
   - Live odds at the moment of betting
-  - Player’s betting behavior and selected risk level
+  - Player’s betting stake and selected risk level
+- Automated bet resolution:
+  - Implemented using **node-cron** to check for concluded matches and trigger result processing without manual input.
 
 ### 👤 User Management
 ![Dashboard](https://github.com/Abijith27UK/BetOnIt/blob/main/user_dashboard.jpg?raw=true)
 - Developed secure **user authentication system** (signup, login, logout).
-- Created **dashboard** to manage wallet, view bet history, and update profile.
+- Created **dashboard** to see user info, manage wallet and view bet history and status.
 - Built a **live transaction and balance management system**:
   - Automatically deducts stakes
   - Credits winnings upon result declaration
@@ -74,7 +75,8 @@
 ### Backend  
 - **Node.js** + **Express** + **TypeScript**  
 - **Socket.io**: WebSocket layer  
-- **MongoDB**: stores user profiles, matches, bets
+- **MongoDB** with **Mongoose**: stores user profiles, matches, bets
+- **Node-cron**: for periodically checking match statuses and automatically resolves bets once matches conclude
 
 ### Data Models  
 - `User` schema: authentication, profile, wallet, bet history  
@@ -96,13 +98,13 @@ git clone https://github.com/Abijith27UK/BetOnIt.git
 cd BetOnIt
 
 # Backend
-cd server
+cd backend
 cp .env.example .env
 # configure MONGODB_URI, JWT_SECRET, etc.
 npm install
 npm run dev
 
 # Frontend (in new terminal)
-cd ../client
+cd ../frontend
 npm install
 npm run dev
