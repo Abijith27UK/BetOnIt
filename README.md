@@ -4,14 +4,6 @@
 
 ---
 
-## 🧭 Table of Contents
-
-1. [Core Features](#core-features)  
-2. [Tech Stack & Architecture](#technical-architecture)  
-3. [Getting Started](#getting-started) 
-
----
-
 ## 🎯 Core Features
 
 - **Plinko Game**:  
@@ -29,6 +21,46 @@
 
 - **Real-Time Communication**:  
   - WebSocket-powered front-to-back updates for live odds, bet status, results, and chat.
+
+---
+
+## 🖥 User Experience
+
+### 🎰 Plinko Game
+![Plinko](https://github.com/Abijith27UK/BetOnIt/blob/main/plinko_pic.jpg?raw=true)
+- Developed a physics-based Plinko game rendered on HTML canvas.
+- Features a **16-drop probability model** with realistic physics simulation.
+- Integrated a **dynamic multiplier system** ranging from **0.5x to 16x**, calculated based on where the ball lands.
+- User interactions are reflected instantly, simulating a real casino experience.
+- Designed to be fair and engaging with randomized, physics-informed outcomes.
+
+### 🏀 Live Sports Betting
+![Betting TimeFrame](https://github.com/Abijith27UK/BetOnIt/blob/main/timeframe.png?raw=true)
+![Closed](https://github.com/Abijith27UK/BetOnIt/blob/main/closed.jpg?raw=true)
+- Built a **timeframe-based betting engine** with 4 match phases:
+  - **Pre-Match**
+  - **First Half**
+  - **Second Half**
+  - **Post-Match (Settled)**
+- Integrated a **dynamic odds system** that updates every **2 seconds** using **Socket.IO**, allowing for multiple active matches and odds changes.
+- Implemented a **risk factor model** that adjusts reward multipliers based on:
+  - Current match phase
+  - Selected odds
+  - Historical performance of teams
+- Custom **reward calculation system** adapts based on:
+  - Bet timing
+  - Live odds at the moment of betting
+  - Player’s betting behavior and selected risk level
+
+### 👤 User Management
+![Dashboard](https://github.com/Abijith27UK/BetOnIt/blob/main/user_dashboard.jpg?raw=true)
+- Developed secure **user authentication system** (signup, login, logout).
+- Created **dashboard** to manage wallet, view bet history, and update profile.
+- Built a **live transaction and balance management system**:
+  - Automatically deducts stakes
+  - Credits winnings upon result declaration
+- **Automated result processing** for each match, integrated with betting outcomes.
+- Tracks and displays **real-time bet history**, including outcomes, match details, and timestamps.
 
 ---
 
