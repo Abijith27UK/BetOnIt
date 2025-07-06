@@ -8,11 +8,7 @@
 
 1. [Core Features](#core-features)  
 2. [Tech Stack & Architecture](#technical-architecture)  
-3. [Getting Started](#getting-started)  
-4. [How to Use](#user-experience)  
-5. [Security & Technical Details](#security--technical-details)  
-6. [Future Enhancements](#future-enhancements)  
-7. [License](#license)
+3. [Getting Started](#getting-started) 
 
 ---
 
